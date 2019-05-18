@@ -1,19 +1,7 @@
-import 'dart:async';
+/// Interactive keyboard native Model
+///
+/// To use, `import 'package:rubber/rubber.dart';`.
+library interactive_keyboard_native;
 
-import 'package:flutter/services.dart';
-
-class InteractiveKeyboardNative {
-
-  static const MethodChannel _channel = const MethodChannel('interactive_keyboard_native');
-
-  static Future<void> endScroll(double velocity) async {
-    await _channel.invokeMethod('endScroll',velocity);
-  }
-  static Future<void> updateScroll(double position) async {
-    await _channel.invokeMethod('updateScroll',position);
-  }
-  static Future<void> startScroll() async {
-    await _channel.invokeMethod('startScroll');
-  }
-
-}
+export 'src/interactive_keyboard_native.dart';
+export 'src/keyboard_manager.dart';

@@ -1,6 +1,5 @@
-
 import 'package:flutter/material.dart';
-import 'package:interactive_keyboard_native/interactive_keyboard_native.dart';
+import 'interactive_keyboard_native.dart';
 
 class KeyboardManagerWidget extends StatefulWidget {
   final Widget child;
@@ -20,7 +19,7 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   Widget build(BuildContext context) {
     return Listener(
       onPointerDown: (details){
-        InteractiveKeyboardNative.startScroll();
+        InteractiveKeyboardNative.startScroll(MediaQuery.of(context).viewInsets.bottom);
         _lastPosition = details.position.dy;
         _lastTime = DateTime.now().millisecondsSinceEpoch;
       },

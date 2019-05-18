@@ -7,6 +7,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 class InteractiveKeyboardNativePlugin: MethodCallHandler {
+
   companion object {
     @JvmStatic
     fun registerWith(registrar: Registrar) {
@@ -15,11 +16,17 @@ class InteractiveKeyboardNativePlugin: MethodCallHandler {
     }
   }
 
+  var keyboardHeight = 0.0
+
   override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+    if (call.method == "endScroll") {
+
+    } 
+    else if(call.method == "startScroll") {
+      //keyboardHeight = call.
+    } 
+    else if(call.method == "updateScroll") {
+
     }
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:interactive_keyboard_native/keyboard_manager.dart';
+import 'package:interactive_keyboard_native/interactive_keyboard_native.dart';
 
 void main() => runApp(MyApp());
 
