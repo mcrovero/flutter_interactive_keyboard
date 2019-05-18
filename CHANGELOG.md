@@ -1,3 +1,4 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* First release of the package. 
+Works both in android and IOS but the animation is available only in IOS

@@ -20,7 +20,6 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   Widget build(BuildContext context) {
     return Listener(
       onPointerDown: (details){
-        //keyboardScaffold.startScrolling();
         InteractiveKeyboardNative.startScroll();
         _lastPosition = details.position.dy;
         _lastTime = DateTime.now().millisecondsSinceEpoch;
@@ -32,18 +31,9 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
         });
         _velocity = _velocity / _velocities.length;
         InteractiveKeyboardNative.endScroll(_velocity);
-        //keyboardScaffold.stopScrolling(_velocity);
       },
       onPointerMove: (details){
         var position = details.position.dy;
-        /*if(keyboardScaffold.isDragging){
-          var tresholdKeyboard = keyboardScaffold.tresholdKeyboard;
-          
-          if(position > tresholdKeyboard && keyboardScaffold.keyboardOpen){
-            keyboardScaffold.closeKeyboard();
-          }
-          keyboardScaffold.overTreshold(position-tresholdKeyboard);
-        }*/
         InteractiveKeyboardNative.updateScroll(position);
         var time = DateTime.now().millisecondsSinceEpoch;
         if(time - _lastTime > 0) {
