@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - interactive_keyboard_native (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `.symlinks/flutter/ios`)
+  - interactive_keyboard_native (from `.symlinks/plugins/interactive_keyboard_native/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: ".symlinks/flutter/ios"
+  interactive_keyboard_native:
+    :path: ".symlinks/plugins/interactive_keyboard_native/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
+  interactive_keyboard_native: 2a00a144baccf4a2c6f1f8b6fbaddff6d13842a3
+
+PODFILE CHECKSUM: ebd43b443038e611b86ede96e613bd6033c49497
+
+COCOAPODS: 1.6.1
