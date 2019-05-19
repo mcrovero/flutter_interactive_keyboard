@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:interactive_keyboard_native/interactive_keyboard_native.dart';
+import 'package:flutter_interactive_keyboard/flutter_interactive_keyboard.dart';
 
 void main() => runApp(MyApp());
 
@@ -16,7 +16,7 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Interactive Keyboard'),
         ),
         body: Container(
           margin: EdgeInsets.only(top:100),

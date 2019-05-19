@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-class InteractiveKeyboardNative {
+class ChannelManager {
 
-  static const MethodChannel _channel = const MethodChannel('interactive_keyboard_native');
+  static const MethodChannel _channel = const MethodChannel('flutter_interactive_keyboard');
 
-  static Future<void> endScroll(double velocity) async {
-    await _channel.invokeMethod('endScroll',velocity);
+  static Future<void> expand() async {
+    await _channel.invokeMethod('expand');
+  }
+  static Future<void> flingClose(double velocity) async {
+    await _channel.invokeMethod('flingClose',velocity);
   }
   static Future<void> updateScroll(double position) async {
     await _channel.invokeMethod('updateScroll',position);

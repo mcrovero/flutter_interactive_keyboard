@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ujiboo.interactive_keyboard_native_example">
+    package="com.ujiboo.flutter_interactive_keyboard_example">
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
@@ -8,7 +8,7 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="interactive_keyboard_native_example"
+        android:label="flutter_interactive_keyboard_example"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

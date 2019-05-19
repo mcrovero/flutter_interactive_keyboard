@@ -1,4 +1,4 @@
-# interactive_keyboard_native
+# flutter_interactive_keyboard
 
 A new Flutter plugin.
 

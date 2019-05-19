@@ -1,4 +1,4 @@
-name: interactive_keyboard_native
+name: flutter_interactive_keyboard
 description: A flutter plugin to dismiss the keyboard interactively.
 version: 0.0.1
 author: Mattia Crovero
@@ -17,5 +17,5 @@ dev_dependencies:
 
 flutter:
   plugin:
-    androidPackage: com.ujiboo.interactive_keyboard_native
+    androidPackage: com.ujiboo.flutter_interactive_keyboard
     pluginClass: InteractiveKeyboardNativePlugin

@@ -41,18 +41,18 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_test:
-    dependency: "direct dev"
-    description: flutter
-    source: sdk
-    version: "0.0.0"
-  interactive_keyboard_native:
+  flutter_interactive_keyboard:
     dependency: "direct dev"
     description:
       path: ".."
       relative: true
     source: path
     version: "0.0.1"
+  flutter_test:
+    dependency: "direct dev"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   matcher:
     dependency: transitive
     description:

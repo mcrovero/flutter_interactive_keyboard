@@ -1,5 +1,5 @@
-name: interactive_keyboard_native_example
-description: Demonstrates how to use the interactive_keyboard_native plugin.
+name: flutter_interactive_keyboard_example
+description: Demonstrates how to use the flutter_interactive_keyboard plugin.
 publish_to: 'none'
 
 environment:
@@ -17,7 +17,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  interactive_keyboard_native:
+  flutter_interactive_keyboard:
     path: ../
 
 # For information on the generic Dart part of this file, see the

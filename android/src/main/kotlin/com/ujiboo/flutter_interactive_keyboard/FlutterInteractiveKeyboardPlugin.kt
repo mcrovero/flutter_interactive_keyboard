@@ -1,4 +1,4 @@
-package com.ujiboo.interactive_keyboard_native
+package com.ujiboo.flutter_interactive_keyboard
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -6,27 +6,19 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
-class InteractiveKeyboardNativePlugin: MethodCallHandler {
+class FlutterInteractiveKeyboardPlugin: MethodCallHandler {
 
   companion object {
     @JvmStatic
     fun registerWith(registrar: Registrar) {
-      val channel = MethodChannel(registrar.messenger(), "interactive_keyboard_native")
-      channel.setMethodCallHandler(InteractiveKeyboardNativePlugin())
+      val channel = MethodChannel(registrar.messenger(), "flutter_interactive_keyboard")
+      channel.setMethodCallHandler(FlutterInteractiveKeyboardPlugin())
     }
   }
 
   var keyboardHeight = 0.0
 
   override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method == "endScroll") {
-
-    } 
-    else if(call.method == "startScroll") {
-      //keyboardHeight = call.
-    } 
-    else if(call.method == "updateScroll") {
-
-    }
+    result.notImplemented()
   }
 }

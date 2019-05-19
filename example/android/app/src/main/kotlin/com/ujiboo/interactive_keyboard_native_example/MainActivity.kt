@@ -1,4 +1,4 @@
-package com.ujiboo.interactive_keyboard_native_example
+package com.ujiboo.flutter_interactive_keyboard_example
 
 import android.os.Bundle
 

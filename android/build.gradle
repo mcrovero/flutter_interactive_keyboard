@@ -1,4 +1,4 @@
-group 'com.ujiboo.interactive_keyboard_native'
+group 'com.ujiboo.flutter_interactive_keyboard'
 version '1.0-SNAPSHOT'
 
 buildscript {

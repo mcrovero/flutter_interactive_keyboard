@@ -1,7 +1,7 @@
 /// Interactive keyboard native Model
 ///
 /// To use, `import 'package:rubber/rubber.dart';`.
-library interactive_keyboard_native;
+library flutter_interactive_keyboard;
 
-export 'src/interactive_keyboard_native.dart';
+//export 'src/channel_manager.dart';
 export 'src/keyboard_manager.dart';

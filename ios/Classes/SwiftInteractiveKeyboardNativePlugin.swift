@@ -7,8 +7,6 @@ public class SwiftInteractiveKeyboardNativePlugin: NSObject, FlutterPlugin {
     var fResp : UIView!
     var keyboardImage = UIImageView()
     
-    var keyboardDragOpen = false 
-    var keyboardClosed = true
     var keyboardRect = CGRect()
     
     override init(){
@@ -18,11 +16,10 @@ public class SwiftInteractiveKeyboardNativePlugin: NSObject, FlutterPlugin {
 
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: .UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: .UIKeyboardWillHide, object: nil)
-        
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "interactive_keyboard_native", binaryMessenger: registrar.messenger())
+        let channel = FlutterMethodChannel(name: "flutter_interactive_keyboard", binaryMessenger: registrar.messenger())
         let instance = SwiftInteractiveKeyboardNativePlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
@@ -30,44 +27,31 @@ public class SwiftInteractiveKeyboardNativePlugin: NSObject, FlutterPlugin {
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
             case "startScroll":
-                if(!keyboardClosed){
-                    keyboardDragOpen = true
-                    if let image = self.takeScreenshot() {
-                        print("screenshot taken")
-                        let screenshot = image.crop(rect: keyboardRect)
-                        keyboardImage.image = screenshot
-                        keyboardImage.frame = keyboardRect
-                    }
+                if let image = self.takeScreenshot() {
+                    let screenshot = image.crop(rect: keyboardRect)
+                    keyboardImage.image = screenshot
+                    keyboardImage.frame = keyboardRect
                 }
+                break;
+            case "closeKeyboard":
+                hideKeyboard(animation: false)
                 break;
             case "updateScroll":
-                if(keyboardDragOpen) {
-                    let value = call.arguments! as! CGFloat
-                    let over = value - (UIScreen.main.bounds.size.height-keyboardImage.frame.height)
-                    if(over > 0) {
-                        keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-keyboardImage.frame.height+over, width: UIScreen.main.bounds.size.width, height: keyboardImage.frame.height)
-                        if(!keyboardClosed) {
-                            hideKeyboard(animation: false)
-                        }
-                    }
-                }
+                let over = call.arguments! as! CGFloat
+                keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-keyboardImage.frame.height+over, width: UIScreen.main.bounds.size.width, height: keyboardImage.frame.height)
                 break;
-            case "endScroll":
-                if(keyboardDragOpen) {
-                    let velocity = call.arguments! as! CGFloat
-                    if(velocity > 0.1) {
-                        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: velocity, animations: {
-                            self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
-                        }, completion: nil)
-                        keyboardDragOpen = false
-                    } else {
-                        UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseIn], animations: {
-                            self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height - self.keyboardImage.frame.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
-                        }, completion: { (finished: Bool) in
-                            self.showKeyboard(animation: false)
-                        })
-                    }
-                }
+            case "flingClose":
+                let velocity = call.arguments! as! CGFloat
+                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: velocity, animations: {
+                    self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
+                }, completion: nil)
+                break;
+            case "expand":
+                UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseIn], animations: {
+                    self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height - self.keyboardImage.frame.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
+                }, completion: { (finished: Bool) in
+                    self.showKeyboard(animation: false)
+                })
                 break;
             default:
                 break
@@ -109,7 +93,6 @@ public class SwiftInteractiveKeyboardNativePlugin: NSObject, FlutterPlugin {
     
     @objc func keyboardWillShow(_ notification: Notification) {
         keyboardImage.isHidden = true
-        keyboardClosed = false
         if let userInfo = notification.userInfo {
             let keyboardFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
             keyboardRect = keyboardFrame!
@@ -117,7 +100,6 @@ public class SwiftInteractiveKeyboardNativePlugin: NSObject, FlutterPlugin {
     }
     
     @objc func keyboardWillHide(_ notification: Notification) {
-        keyboardClosed = true
         keyboardImage.isHidden = false
     }
 }

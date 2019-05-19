@@ -1,9 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:interactive_keyboard_native/interactive_keyboard_native.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel('interactive_keyboard_native');
+  const MethodChannel channel = MethodChannel('flutter_interactive_keyboard');
 
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -15,7 +14,4 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('getPlatformVersion', () async {
-    expect(await InteractiveKeyboardNative.platformVersion, '42');
-  });
 }

@@ -1,4 +1,5 @@
 ## 0.0.1
 
 * First release of the package. 
-Works both in android and IOS but the animation is available only in IOS
+An interactive way to interact with the virtual keyboard. 
+On IOS devices the intraction is similar to the interactive keyboard dismiss of UIScrollViews 

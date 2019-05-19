@@ -1,6 +1,6 @@
-# interactive_keyboard_native_example
+# flutter_interactive_keyboard_example
 
-Demonstrates how to use the interactive_keyboard_native plugin.
+Demonstrates how to use the flutter_interactive_keyboard plugin.
 
 ## Getting Started
 

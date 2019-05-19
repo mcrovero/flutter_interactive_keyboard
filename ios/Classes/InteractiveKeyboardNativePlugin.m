@@ -1,5 +1,5 @@
 #import "InteractiveKeyboardNativePlugin.h"
-#import <interactive_keyboard_native/interactive_keyboard_native-Swift.h>
+#import <flutter_interactive_keyboard/flutter_interactive_keyboard-Swift.h>
 
 @implementation InteractiveKeyboardNativePlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
