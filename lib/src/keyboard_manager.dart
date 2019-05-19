@@ -6,8 +6,8 @@ import 'channel_manager.dart';
 
 class KeyboardManagerWidget extends StatefulWidget {
   final Widget child;
-  final ScrollController scrollController;
-  KeyboardManagerWidget({Key key, this.child, this.scrollController}) : super(key: key);
+
+  KeyboardManagerWidget({Key key, this.child}) : super(key: key);
 
   _KeyboardManagerWidgetState createState() => _KeyboardManagerWidgetState();
 }
@@ -50,7 +50,6 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
           _velocity = _velocity / _velocities.length;
 
           if(_over > 0) {
-            print(_velocity);
             if(_velocity > 0.5) {
               if(Platform.isIOS) {
                 ChannelManager.flingClose(_velocity);
@@ -59,7 +58,9 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
               }
             } else {
               if(Platform.isIOS) {
-                ChannelManager.expand();
+                ChannelManager.expand().then((value){
+                  showKeyboard();
+                });
               } else {
                 showKeyboard();
               }
@@ -86,12 +87,15 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
           if(_over > 0){
             if(Platform.isIOS) {
+              if(_keyboardOpen)
+                hideKeyboard();
               ChannelManager.updateScroll(_over);
             } else {
-              if(_velocity > 0) {
+              if(_velocity > 0.5) {
                 if(_keyboardOpen)
                   hideKeyboard();
-              } else {
+              } 
+              else if(_velocity < -0.5) {
                 if(!_keyboardOpen)
                   showKeyboard();
               }

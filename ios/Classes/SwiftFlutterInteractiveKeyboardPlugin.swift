@@ -1,7 +1,7 @@
 import Flutter
 import UIKit
 
-public class SwiftInteractiveKeyboardNativePlugin: NSObject, FlutterPlugin {
+public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     
     var mainWindow : UIWindow!
     var fResp : UIView!
@@ -20,61 +20,44 @@ public class SwiftInteractiveKeyboardNativePlugin: NSObject, FlutterPlugin {
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_interactive_keyboard", binaryMessenger: registrar.messenger())
-        let instance = SwiftInteractiveKeyboardNativePlugin()
+        let instance = SwiftFlutterInteractiveKeyboardPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
             case "startScroll":
+                UIView.setAnimationsEnabled(false)
                 if let image = self.takeScreenshot() {
                     let screenshot = image.crop(rect: keyboardRect)
                     keyboardImage.image = screenshot
                     keyboardImage.frame = keyboardRect
                 }
                 break;
-            case "closeKeyboard":
-                hideKeyboard(animation: false)
-                break;
             case "updateScroll":
                 let over = call.arguments! as! CGFloat
                 keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-keyboardImage.frame.height+over, width: UIScreen.main.bounds.size.width, height: keyboardImage.frame.height)
                 break;
             case "flingClose":
+                UIView.setAnimationsEnabled(true)
                 let velocity = call.arguments! as! CGFloat
                 UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: velocity, animations: {
                     self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
-                }, completion: nil)
+                }, completion: { (finished: Bool) in
+                    UIView.setAnimationsEnabled(false)
+                })
                 break;
             case "expand":
+                UIView.setAnimationsEnabled(true)
                 UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseIn], animations: {
                     self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height - self.keyboardImage.frame.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
                 }, completion: { (finished: Bool) in
-                    self.showKeyboard(animation: false)
+                    result(true)
+                    UIView.setAnimationsEnabled(false)
                 })
                 break;
             default:
                 break
-        }
-    }
-    
-    func showKeyboard(animation: Bool) {
-        if(!animation) {
-            UIView.setAnimationsEnabled(false)
-        }
-        fResp.becomeFirstResponder()
-        if(!animation) {
-            UIView.setAnimationsEnabled(true)
-        }
-    }
-    func hideKeyboard(animation: Bool) {
-        if(!animation) {
-            UIView.setAnimationsEnabled(false)
-        }
-        fResp = mainWindow.firstResponder!
-        fResp.endEditing(true)
-        if(!animation) {
-            UIView.setAnimationsEnabled(true)
         }
     }
     
@@ -115,18 +98,5 @@ extension UIImage {
         let imageRef = self.cgImage!.cropping(to: rect)
         let image = UIImage(cgImage: imageRef!, scale: self.scale, orientation: self.imageOrientation)
         return image
-    }
-}
-extension UIView {
-    var firstResponder: UIView? {
-        guard !isFirstResponder else { return self }
-        
-        for subview in subviews {
-            if let firstResponder = subview.firstResponder {
-                return firstResponder
-            }
-        }
-        
-        return nil
     }
 }

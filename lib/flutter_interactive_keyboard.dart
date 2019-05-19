@@ -1,4 +1,4 @@
-/// Interactive keyboard native Model
+/// Flutter interactive keyboard Model
 ///
 /// To use, `import 'package:rubber/rubber.dart';`.
 library flutter_interactive_keyboard;
