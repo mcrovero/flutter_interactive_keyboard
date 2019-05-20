@@ -87,8 +87,8 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
           if(_over > 0){
             if(Platform.isIOS) {
-              if(_keyboardOpen)
-                hideKeyboard();
+              /*if(_keyboardOpen)
+                hideKeyboard();*/
               ChannelManager.updateScroll(_over);
             } else {
               if(_velocity > 0.5) {

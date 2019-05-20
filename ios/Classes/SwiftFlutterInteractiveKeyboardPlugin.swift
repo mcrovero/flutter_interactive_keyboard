@@ -9,11 +9,17 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     
     var keyboardRect = CGRect()
     
+    var textField = UITextField()
+    
+    var takingScreenshot = false
+    
     override init(){
         super.init()
         mainWindow = UIApplication.shared.delegate?.window!
         mainWindow.rootViewController?.view.addSubview(keyboardImage)
+        mainWindow.rootViewController?.view.addSubview(textField)
 
+        UIView.setAnimationsEnabled(true)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: .UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: .UIKeyboardWillHide, object: nil)
     }
@@ -28,15 +34,29 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
         switch call.method {
             case "startScroll":
                 UIView.setAnimationsEnabled(false)
-                if let image = self.takeScreenshot() {
-                    let screenshot = image.crop(rect: keyboardRect)
-                    keyboardImage.image = screenshot
-                    keyboardImage.frame = keyboardRect
+                takingScreenshot = true
+                takeScreenshot{
+                    image in
+                    DispatchQueue.main.async {
+                        let screenshot = image//.crop(rect: self.keyboardRect)
+                        self.keyboardImage.image = screenshot
+                        self.keyboardImage.frame = self.keyboardRect
+                        self.keyboardImage.contentMode = .scaleAspectFit
+
+                        //self.keyboardImage.frame = self.keyboardRect
+                        self.textField.becomeFirstResponder()
+                        self.textField.resignFirstResponder()
+                        self.takingScreenshot = false
+                    }
                 }
                 break;
             case "updateScroll":
-                let over = call.arguments! as! CGFloat
-                keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-keyboardImage.frame.height+over, width: UIScreen.main.bounds.size.width, height: keyboardImage.frame.height)
+                if(!takingScreenshot) {
+                    DispatchQueue.main.async {
+                        let over = call.arguments! as! CGFloat
+                        self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-self.keyboardRect.height+over, width: UIScreen.main.bounds.size.width, height: self.keyboardRect.height)
+                    }
+                }
                 break;
             case "flingClose":
                 UIView.setAnimationsEnabled(true)
@@ -44,7 +64,9 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
                 UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: velocity, animations: {
                     self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
                 }, completion: { (finished: Bool) in
-                    UIView.setAnimationsEnabled(false)
+                    DispatchQueue.main.async {
+                        UIView.setAnimationsEnabled(false)
+                    }
                 })
                 break;
             case "expand":
@@ -53,7 +75,9 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
                     self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height - self.keyboardImage.frame.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
                 }, completion: { (finished: Bool) in
                     result(true)
-                    UIView.setAnimationsEnabled(false)
+                    DispatchQueue.main.async {
+                        UIView.setAnimationsEnabled(false)
+                    }
                 })
                 break;
             default:
@@ -61,17 +85,31 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    func takeScreenshot() -> UIImage? {
-        let imgSize = UIScreen.main.bounds.size
-        UIGraphicsBeginImageContextWithOptions(imgSize, false, 0)
+    var img = UIImage()
+    func takeScreenshot(completionHandler: @escaping (_ screenshot: UIImage)->()) {
+        var layers = [CALayer]()
         for window in UIApplication.shared.windows {
-            if window.screen == UIScreen.main {
-                window.drawHierarchy(in: window.bounds, afterScreenUpdates: false)
+            //if window.screen == UIScreen.main {
+            layers.append(window.layer)
+            print(window.screen.scale)
+            //}
+        }
+        //let layer = w.layer
+        let mainSize = mainWindow.screen.applicationFrame.size
+        DispatchQueue.global(qos: .background).async {
+            UIGraphicsBeginImageContextWithOptions(mainSize, false, 3)
+            //w.drawHierarchy(in: bounds, afterScreenUpdates: false)
+            for layer in layers {
+                layer.render(in: UIGraphicsGetCurrentContext()!)
+                layer.contentsScale = 0.5
+            }
+            
+            self.img = UIGraphicsGetImageFromCurrentImageContext()!
+            UIGraphicsEndImageContext()
+            DispatchQueue.main.async {
+                completionHandler(self.img)
             }
         }
-        let img = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return img
     }
     
     @objc func keyboardWillShow(_ notification: Notification) {
@@ -84,6 +122,9 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     
     @objc func keyboardWillHide(_ notification: Notification) {
         keyboardImage.isHidden = false
+        DispatchQueue.main.async {
+            UIView.setAnimationsEnabled(true)
+        }
     }
 }
 
