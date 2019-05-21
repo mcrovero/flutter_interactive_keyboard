@@ -17,9 +17,12 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   double _velocity; 
   int _lastTime;
   double _lastPosition;
-  bool _isDragging = false;
+
+  bool _isKeyboardDrag = false;
   bool _keyboardOpen = false;
-  double _keyboardHeight;
+  bool _dragging = false;
+
+  double _keyboardHeight = 0.0;
   double _over;
 
   @override
@@ -30,19 +33,21 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
       _keyboardHeight = bottom;
     return Listener(
       onPointerDown: (details){
+        print("pointerDown");
+        _dragging = true;
         _velocities.clear();
-        _isDragging = _keyboardOpen;
-        if(_isDragging){
-          if(Platform.isIOS) {
-            ChannelManager.startScroll(MediaQuery.of(context).viewInsets.bottom);
-          }
-
-          _lastPosition = details.position.dy;
-          _lastTime = DateTime.now().millisecondsSinceEpoch;
+        if(Platform.isIOS && _keyboardOpen) {
+          _isKeyboardDrag = true;
+          ChannelManager.startScroll(MediaQuery.of(context).viewInsets.bottom);
         }
+        
+        _lastPosition = details.position.dy;
+        _lastTime = DateTime.now().millisecondsSinceEpoch;
       },
       onPointerUp: (details){
-        if(_isDragging){
+        _dragging = false;
+        if(_isKeyboardDrag){
+          print("pointerUp");
           _velocity = 0;
           _velocities.forEach((velocity){
             _velocity += velocity;
@@ -50,30 +55,42 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
           _velocity = _velocity / _velocities.length;
 
           if(_over > 0) {
-            if(_velocity > 0.5) {
+            if(_velocity.abs() > 0) {
               if(Platform.isIOS) {
-                ChannelManager.flingClose(_velocity);
-              } else {
-                hideKeyboard();
-              }
+                ChannelManager.fling(_velocity).then((value){
+                  if(!_dragging){
+                    if(_velocity<0){
+                      showKeyboard();
+                    }
+                    _isKeyboardDrag = false;
+                  }
+                });
+              } 
             } else {
               if(Platform.isIOS) {
                 ChannelManager.expand().then((value){
-                  showKeyboard();
+                  if(!_dragging){
+                    showKeyboard();
+                    _isKeyboardDrag = false;
+                  }
                 });
-              } else {
-                showKeyboard();
-              }
+              } 
+            }
+          } else {
+            _isKeyboardDrag = false;
+            if(!_keyboardOpen){
+              showKeyboard();
             }
           }
-          _isDragging = false;
         }
       },
       onPointerMove: (details){
-        if(_isDragging){
+        _dragging = true;
+        if(_isKeyboardDrag){
+          print("pointerMove");
           var position = details.position.dy;
           _over = position - (MediaQuery.of(context).size.height - _keyboardHeight);
-            
+          print(_over);  
           var time = DateTime.now().millisecondsSinceEpoch;
           if(time - _lastTime > 0) {
             _velocity = (position - _lastPosition)/(time - _lastTime);
@@ -87,11 +104,11 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
           if(_over > 0){
             if(Platform.isIOS) {
-              /*if(_keyboardOpen)
-                hideKeyboard();*/
+              if(_keyboardOpen)
+                hideKeyboard();
               ChannelManager.updateScroll(_over);
             } else {
-              if(_velocity > 0.5) {
+              if(_velocity > 0.1) {
                 if(_keyboardOpen)
                   hideKeyboard();
               } 
@@ -100,6 +117,8 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
                   showKeyboard();
               }
             }
+          } else {
+            ChannelManager.updateScroll(0.0);
           }
         }
       },

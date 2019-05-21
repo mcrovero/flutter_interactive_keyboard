@@ -4,24 +4,25 @@ import UIKit
 public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     
     var mainWindow : UIWindow!
-    var fResp : UIView!
-    var keyboardImage = UIImageView()
-    
+    var keyboardView = UIView()
+    var keyboardBackground = UIView()
     var keyboardRect = CGRect()
-    
+    // To dismiss keyboard
     var textField = UITextField()
-    
     var takingScreenshot = false
     
     override init(){
         super.init()
         mainWindow = UIApplication.shared.delegate?.window!
-        mainWindow.rootViewController?.view.addSubview(keyboardImage)
+        keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: 0)
+        keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: 0)
+        mainWindow.rootViewController?.view.addSubview(keyboardBackground)
+        mainWindow.rootViewController?.view.addSubview(keyboardView)
         mainWindow.rootViewController?.view.addSubview(textField)
-
         UIView.setAnimationsEnabled(true)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: .UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: .UIKeyboardWillHide, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: .UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: .UIKeyboardWillHide, object: nil)
+        
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -33,50 +34,46 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
             case "startScroll":
-                UIView.setAnimationsEnabled(false)
-                takingScreenshot = true
-                takeScreenshot{
-                    image in
-                    DispatchQueue.main.async {
-                        let screenshot = image//.crop(rect: self.keyboardRect)
-                        self.keyboardImage.image = screenshot
-                        self.keyboardImage.frame = self.keyboardRect
-                        self.keyboardImage.contentMode = .scaleAspectFit
-
-                        //self.keyboardImage.frame = self.keyboardRect
-                        self.textField.becomeFirstResponder()
-                        self.textField.resignFirstResponder()
-                        self.takingScreenshot = false
-                    }
+                takeScreenshot {
+                    UIView.setAnimationsEnabled(false)
+                    self.textField.becomeFirstResponder()
+                    self.textField.resignFirstResponder()
                 }
                 break;
             case "updateScroll":
-                if(!takingScreenshot) {
-                    DispatchQueue.main.async {
-                        let over = call.arguments! as! CGFloat
-                        self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-self.keyboardRect.height+over, width: UIScreen.main.bounds.size.width, height: self.keyboardRect.height)
-                    }
-                }
+                let over = call.arguments! as! CGFloat
+                keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-keyboardView.frame.height+over, width: UIScreen.main.bounds.size.width, height: keyboardView.frame.height)
                 break;
-            case "flingClose":
+            case "fling":
                 UIView.setAnimationsEnabled(true)
                 let velocity = call.arguments! as! CGFloat
-                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: velocity, animations: {
-                    self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
-                }, completion: { (finished: Bool) in
-                    DispatchQueue.main.async {
-                        UIView.setAnimationsEnabled(false)
-                    }
-                })
+                if(velocity < 0){
+                    UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: velocity * -1, animations: {
+                        self.keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-self.keyboardView.frame.height, width: UIScreen.main.bounds.size.width, height: self.keyboardView.frame.height)
+                    }, completion: { (finished: Bool) in
+                        if(finished) {
+                            UIView.setAnimationsEnabled(false)
+                            result(true)
+                        }
+                    })
+                } else {
+                    UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: velocity, animations: {
+                        self.keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: self.keyboardView.frame.height)
+                    }, completion: { (finished: Bool) in
+                        if(finished) {
+                            result(true)
+                        }
+                    })
+                }
                 break;
             case "expand":
                 UIView.setAnimationsEnabled(true)
                 UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseIn], animations: {
-                    self.keyboardImage.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height - self.keyboardImage.frame.height, width: UIScreen.main.bounds.size.width, height: self.keyboardImage.frame.height)
+                    self.keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height - self.keyboardRect.height, width: UIScreen.main.bounds.size.width, height: self.keyboardRect.height)
                 }, completion: { (finished: Bool) in
-                    result(true)
-                    DispatchQueue.main.async {
+                    if(finished) {
                         UIView.setAnimationsEnabled(false)
+                        result(true)
                     }
                 })
                 break;
@@ -85,45 +82,39 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    var img = UIImage()
-    func takeScreenshot(completionHandler: @escaping (_ screenshot: UIImage)->()) {
-        var layers = [CALayer]()
+    func takeScreenshot(completionHandler: @escaping ()->()) {
+        var w = UIWindow()
+        for view in keyboardView.subviews {
+            view.removeFromSuperview()
+        }
         for window in UIApplication.shared.windows {
-            //if window.screen == UIScreen.main {
-            layers.append(window.layer)
-            print(window.screen.scale)
-            //}
-        }
-        //let layer = w.layer
-        let mainSize = mainWindow.screen.applicationFrame.size
-        DispatchQueue.global(qos: .background).async {
-            UIGraphicsBeginImageContextWithOptions(mainSize, false, 3)
-            //w.drawHierarchy(in: bounds, afterScreenUpdates: false)
-            for layer in layers {
-                layer.render(in: UIGraphicsGetCurrentContext()!)
-                layer.contentsScale = 0.5
-            }
-            
-            self.img = UIGraphicsGetImageFromCurrentImageContext()!
-            UIGraphicsEndImageContext()
-            DispatchQueue.main.async {
-                completionHandler(self.img)
+            if window.screen == UIScreen.main {
+                w = window
             }
         }
+        let v = w.resizableSnapshotView(from: keyboardRect, afterScreenUpdates: false, withCapInsets: .zero)!
+        keyboardView.addSubview(v)
+        keyboardView.frame = keyboardRect
+        completionHandler()
+
     }
     
-    @objc func keyboardWillShow(_ notification: Notification) {
-        keyboardImage.isHidden = true
+    @objc func handleKeyboard(_ notification: Notification) {
         if let userInfo = notification.userInfo {
             let keyboardFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
+            let isKeyboardShowing = notification.name == NSNotification.Name.UIKeyboardWillShow
             keyboardRect = keyboardFrame!
-        }
-    }
-    
-    @objc func keyboardWillHide(_ notification: Notification) {
-        keyboardImage.isHidden = false
-        DispatchQueue.main.async {
-            UIView.setAnimationsEnabled(true)
+            if(isKeyboardShowing) {
+                keyboardView.isHidden = true
+                keyboardView.frame = keyboardRect
+            } else {
+                keyboardView.isHidden = false
+            }
+            keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height -  (isKeyboardShowing ? keyboardRect.size.height : 0), width: keyboardRect.size.width, height: keyboardRect.size.height)
+            keyboardBackground.backgroundColor = .white
+            UIView.animate(withDuration: 0, animations: { () -> Void in
+                self.keyboardBackground.layoutIfNeeded()
+            })
         }
     }
 }

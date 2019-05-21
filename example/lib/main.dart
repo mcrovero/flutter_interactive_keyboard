@@ -22,7 +22,9 @@ class _MyAppState extends State<MyApp> {
           margin: EdgeInsets.only(top:100),
           child: Column(
             children: <Widget>[
-              TextField(),
+              TextField(
+                keyboardAppearance: Brightness.dark,
+              ),
               Expanded(
                 child: KeyboardManagerWidget(
                   child: ListView.builder(
