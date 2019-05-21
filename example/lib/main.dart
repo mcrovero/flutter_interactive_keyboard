@@ -10,6 +10,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
+  final FocusNode _focusNode = InteractiveKeyboardFocusNode();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,10 +25,12 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: <Widget>[
               TextField(
+                focusNode: _focusNode,
                 keyboardAppearance: Brightness.dark,
               ),
               Expanded(
                 child: KeyboardManagerWidget(
+                  focusNode: _focusNode,
                   child: ListView.builder(
                     itemCount: 100,
                     itemBuilder: (context,index){

@@ -6,6 +6,12 @@ class ChannelManager {
 
   static const MethodChannel _channel = const MethodChannel('flutter_interactive_keyboard');
 
+  static Future<void> show(bool show) async {
+    await _channel.invokeMethod('showView',show);
+  }
+  static Future<void> animate(bool animate) async {
+    await _channel.invokeMethod('animate',animate);
+  }
   static Future<bool> expand() async {
     return await _channel.invokeMethod('expand');
   }
