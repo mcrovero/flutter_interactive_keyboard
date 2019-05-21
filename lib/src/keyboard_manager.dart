@@ -46,9 +46,11 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
         if(activePointer == null) {
           activePointer = details.pointer;
           _velocities.clear();
-          if(Platform.isIOS && _keyboardOpen) {
+          if(_keyboardOpen) {
+            if(Platform.isIOS) {
+              ChannelManager.startScroll(MediaQuery.of(context).viewInsets.bottom);
+            }
             _dragging = true;
-            ChannelManager.startScroll(MediaQuery.of(context).viewInsets.bottom);
           }
           _lastPosition = details.position.dy;
           _lastTime = DateTime.now().millisecondsSinceEpoch;
@@ -56,7 +58,6 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
       },
       onPointerHover: (details) {
         print("pointerHover");
-
         if(details.pointer == activePointer)
           activePointer = null;
       },
