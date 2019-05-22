@@ -129,10 +129,11 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
   showKeyboard(bool animate) {
     if(!animate && Platform.isIOS){
-      ChannelManager.animate(false).then((value){
+      /*ChannelManager.animate(false).then((value){
         _showKeyboard();
         ChannelManager.animate(true);
-      });
+      });*/
+      ChannelManager.showKeyboard(true);
     } else {
       _showKeyboard();
     }
@@ -144,10 +145,11 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
   hideKeyboard(bool animate) {
     if(!animate && Platform.isIOS){
-      ChannelManager.animate(false).then((value){
+      /*ChannelManager.animate(false).then((value){
         _hideKeyboard();
         ChannelManager.animate(true);
-      });
+      });*/
+      ChannelManager.showKeyboard(false);
     } else {
       _hideKeyboard();
     }

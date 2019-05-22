@@ -4,12 +4,12 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `.symlinks/flutter/ios-release`)
   - flutter_interactive_keyboard (from `.symlinks/plugins/flutter_interactive_keyboard/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: ".symlinks/flutter/ios-release"
   flutter_interactive_keyboard:
     :path: ".symlinks/plugins/flutter_interactive_keyboard/ios"
 

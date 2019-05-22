@@ -8,8 +8,8 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     var keyboardBackground = UIView()
     var keyboardRect = CGRect()
     var takingScreenshot = false
-    var showView = true
     var keyboardOpen = false
+    var firstResponder = UIView()
     
     override init(){
         super.init()
@@ -31,8 +31,15 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-            case "showView":
-                showView = (call.arguments! as! Bool)
+            case "showKeyboard":
+                UIView.setAnimationsEnabled(false)
+                let show = (call.arguments! as! Bool)
+                if(show) {
+                    showKeyboard()
+                } else {
+                    hideKeyboard()
+                }
+                UIView.setAnimationsEnabled(true)
                 result(true)
                 break;
             case "animate":
@@ -100,6 +107,17 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
         keyboardView.frame = keyboardRect
     }
     
+    func showKeyboard() {
+        print(firstResponder)
+        firstResponder.becomeFirstResponder()
+    }
+    func hideKeyboard() {
+        if let fR = mainWindow.rootViewController?.view.window?.firstResponder {
+            firstResponder = fR
+            fR.endEditing(true)
+        }
+    }
+    
     @objc func handleKeyboard(_ notification: Notification) {
         if let userInfo = notification.userInfo {
             let keyboardFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
@@ -114,5 +132,18 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
                 self.keyboardBackground.layoutIfNeeded()
             })
         }
+    }
+}
+extension UIView {
+    var firstResponder: UIView? {
+        guard !isFirstResponder else { return self }
+        
+        for subview in subviews {
+            if let firstResponder = subview.firstResponder {
+                return firstResponder
+            }
+        }
+        
+        return nil
     }
 }
