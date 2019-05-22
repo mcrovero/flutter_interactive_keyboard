@@ -9,6 +9,7 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     var keyboardRect = CGRect()
     var takingScreenshot = false
     var showView = true
+    var keyboardOpen = false
     
     override init(){
         super.init()
@@ -40,16 +41,17 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
                 result(true)
                 break;
             case "startScroll":
-                takeScreenshot()
+                if(keyboardOpen) {
+                    takeScreenshot()
+                }
                 result(true)
                 break;
             case "updateScroll":
                 let over = call.arguments! as! CGFloat
-                keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-keyboardView.frame.height+over, width: UIScreen.main.bounds.size.width, height: keyboardView.frame.height)
+                keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-keyboardView.frame.height+over, width: keyboardView.frame.width, height: keyboardView.frame.height)
                 result(true)
                 break;
             case "fling":
-                UIView.setAnimationsEnabled(true)
                 let velocity = call.arguments! as! CGFloat
                 if(velocity < 0){
                     UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: velocity * -1, animations: {
@@ -70,7 +72,6 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
                 }
                 break;
             case "expand":
-                UIView.setAnimationsEnabled(true)
                 UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 2, animations: {
                     self.keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-self.keyboardView.frame.height, width: UIScreen.main.bounds.size.width, height: self.keyboardView.frame.height)
                 }, completion: { (finished: Bool) in
@@ -103,12 +104,10 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
         if let userInfo = notification.userInfo {
             let keyboardFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
             let isKeyboardShowing = notification.name == NSNotification.Name.UIKeyboardWillShow
+            keyboardOpen = isKeyboardShowing
+            keyboardView.isHidden = isKeyboardShowing
             keyboardRect = keyboardFrame!
-            if(isKeyboardShowing || !showView) {
-                keyboardView.isHidden = true
-            } else {
-                keyboardView.isHidden = false
-            }
+
             keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height -  (isKeyboardShowing ? keyboardRect.size.height : 0), width: keyboardRect.size.width, height: keyboardRect.size.height)
             keyboardBackground.backgroundColor = .white
             UIView.animate(withDuration: 0, animations: { () -> Void in

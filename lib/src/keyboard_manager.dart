@@ -13,7 +13,8 @@ class KeyboardManagerWidget extends StatefulWidget {
 }
 
 class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
-  int activePointer;
+  List<int> _pointers = [];
+  int get activePointer => _pointers.length > 0 ? _pointers.first : null;
 
   List<double> _velocities = [];
   double _velocity; 
@@ -21,18 +22,10 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   double _lastPosition;
 
   bool _keyboardOpen = false;
-  bool _dragging = false;
   bool _isAnimating = false;
 
   double _keyboardHeight = 0.0;
   double _over;
-
-  @override
-  void initState() { 
-    super.initState();
-    widget.focusNode.addListener((){
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,132 +36,124 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
     return Listener(
       onPointerDown: (details){
         print("pointerDown $_isAnimating $activePointer");
-        if(activePointer == null) {
-          activePointer = details.pointer;
-          _velocities.clear();
-          if(_keyboardOpen) {
-            if(Platform.isIOS) {
-              ChannelManager.startScroll(MediaQuery.of(context).viewInsets.bottom);
-            }
-            _dragging = true;
+        _pointers.add(details.pointer);
+        if(_pointers.length == 1) {
+          if(Platform.isIOS) {
+            ChannelManager.startScroll(MediaQuery.of(context).viewInsets.bottom);
           }
           _lastPosition = details.position.dy;
           _lastTime = DateTime.now().millisecondsSinceEpoch;
+          _velocities.clear();
         }
       },
-      onPointerHover: (details) {
-        print("pointerHover");
-        if(details.pointer == activePointer)
-          activePointer = null;
+      onPointerUp: (details){
+        print("pointerUp $_velocity, $_over, ${details.pointer}, $activePointer");
+        if(details.pointer == activePointer) {
+          if(_over > 0) {
+            if(Platform.isIOS){
+              _isAnimating = true;
+              if(_velocity > 0.1 || _velocity < -0.3){
+                print("fling $_velocity");
+                ChannelManager.fling(_velocity).then((value){
+                  _isAnimating = false;
+                  if(_velocity<0 && activePointer==null){
+                    print("keyboard open");
+                    showKeyboard(false);
+                  } 
+                });
+              } else {
+                print("expand");
+                ChannelManager.expand().then((value){
+                  _isAnimating = false;
+                  if(activePointer==null){
+                    print("keyboard open");
+                    showKeyboard(false);
+                  }
+                });
+              }
+            } 
+          }
+        }
+        _pointers.remove(details.pointer);
+      },
+      onPointerMove: (details){
+        var position = details.position.dy;
+        _over = position - (MediaQuery.of(context).size.height - _keyboardHeight);
+        updateVelocity(position);
+        print("pointerMove $_over, $_isAnimating, $activePointer, ${details.pointer}");
+        if(details.pointer == activePointer) {
+          if(_over > 0){
+            if(Platform.isIOS) {
+              if(_keyboardOpen)
+                hideKeyboard(false);
+              ChannelManager.updateScroll(_over);
+            } else {
+              if(_velocity > 0.1) {
+                if(_keyboardOpen)
+                  hideKeyboard(true);
+              } 
+              else if(_velocity < -0.5) {
+                if(!_keyboardOpen)
+                  showKeyboard(true);
+              }
+            }
+          } else {
+            if(Platform.isIOS) {
+              if(!_keyboardOpen){
+                showKeyboard(false);
+              }
+            }
+          }
+        }
       },
       onPointerExit: (details){
         print("pointerExit");
-        if(details.pointer == activePointer)
-          activePointer = null;
+        _pointers.remove(details.pointer);
       },
       onPointerCancel: (details){
         print("pointerCancel");
-        if(details.pointer == activePointer)
-          activePointer = null;
-      },
-      onPointerUp: (details){
-        print("pointerUp $_velocity - $_over - ${details.pointer} - $activePointer");
-        if(details.pointer == activePointer) {
-          activePointer = null;
-          _dragging = false;
-          if(!_isAnimating){
-            if(_over > 0) {
-              if(Platform.isIOS){
-                print("fling $_velocity");
-                _isAnimating = true;
-                if(_velocity.abs()>0.3){
-                  ChannelManager.fling(_velocity).then((value){
-                    _isAnimating = false;
-                    if(_velocity<0 && !_dragging && activePointer==null){
-                      showKeyboard(false);
-                    } 
-                  });
-                } else {
-                  print("expand");
-                  ChannelManager.expand().then((value){
-                    _isAnimating = false;
-                    if(!_dragging && activePointer==null)
-                      showKeyboard(false);
-                  });
-                }
-              } 
-            }
-          }
-        }
-      },
-      onPointerMove: (details){
-        print("pointerMove $_isAnimating $activePointer ${details.pointer}");
-        if(details.pointer == activePointer) {
-          if(!_isAnimating && _dragging){
-            // UPDATING VELOCITY
-            var position = details.position.dy;
-            _over = position - (MediaQuery.of(context).size.height - _keyboardHeight);
-            var time = DateTime.now().millisecondsSinceEpoch;
-            if(time - _lastTime > 0) {
-              _velocity = (position - _lastPosition)/(time - _lastTime);
-            }
-            _lastPosition = position;
-            _lastTime = time;
-            // -----------------
-
-            if(_over > 0){
-              if(Platform.isIOS) {
-                if(_keyboardOpen)
-                  hideKeyboard(false);
-                ChannelManager.updateScroll(_over);
-              } else {
-                if(_velocity > 0.1) {
-                  if(_keyboardOpen)
-                    hideKeyboard(true);
-                } 
-                else if(_velocity < -0.5) {
-                  if(!_keyboardOpen)
-                    showKeyboard(true);
-                }
-              }
-            } else {
-              if(Platform.isIOS) {
-                ChannelManager.updateScroll(0.0);
-                if(!_keyboardOpen){
-                  showKeyboard(false);
-                }
-              }
-            }
-          }
-        }
+        _pointers.remove(details.pointer);
       },
       child: widget.child,
     );
   }
 
+  updateVelocity(double position) {
+    var time = DateTime.now().millisecondsSinceEpoch;
+    if(time - _lastTime > 0) {
+      _velocity = (position - _lastPosition)/(time - _lastTime);
+    }
+    _lastPosition = position;
+    _lastTime = time;
+  }
+
   showKeyboard(bool animate) {
     if(!animate && Platform.isIOS){
       ChannelManager.animate(false).then((value){
-        FocusScope.of(context).requestFocus(widget.focusNode);
-        SystemChannels.textInput.invokeMethod('TextInput.show');
+        _showKeyboard();
         ChannelManager.animate(true);
       });
     } else {
-      FocusScope.of(context).requestFocus(widget.focusNode);
-      SystemChannels.textInput.invokeMethod('TextInput.show');
+      _showKeyboard();
     }
+  }
+  _showKeyboard() {
+    FocusScope.of(context).requestFocus(widget.focusNode);
+    SystemChannels.textInput.invokeMethod('TextInput.show');
   }
 
   hideKeyboard(bool animate) {
     if(!animate && Platform.isIOS){
       ChannelManager.animate(false).then((value){
-        SystemChannels.textInput.invokeMethod('TextInput.hide');
-        FocusScope.of(context).requestFocus(FocusNode());
+        _hideKeyboard();
         ChannelManager.animate(true);
       });
     } else {
-      SystemChannels.textInput.invokeMethod('TextInput.hide');
-      FocusScope.of(context).requestFocus(FocusNode());
+      _hideKeyboard();
     }
+  }
+  _hideKeyboard(){
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 }
