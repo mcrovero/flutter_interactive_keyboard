@@ -17,15 +17,15 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   int get activePointer => _pointers.length > 0 ? _pointers.first : null;
 
   List<double> _velocities = [];
-  double _velocity; 
-  int _lastTime;
-  double _lastPosition;
+  double _velocity = 0.0; 
+  int _lastTime = 0;
+  double _lastPosition = 0.0;
 
   bool _keyboardOpen = false;
   bool _isAnimating = false;
 
   double _keyboardHeight = 0.0;
-  double _over;
+  double _over = 0.0;
 
   bool dismissed = true; 
 
@@ -37,13 +37,14 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
     var bottom = MediaQuery.of(context).viewInsets.bottom;
     _keyboardOpen = bottom > 0;
     if(_keyboardOpen) {
+      print("keyboardOpen");
       dismissed = false; 
       _keyboardHeight = bottom;
     }
     return Listener(
       onPointerDown: (details){
+        print("pointerDown $dismissed $_isAnimating $activePointer");
         if(!dismissed) {
-          print("pointerDown $_isAnimating $activePointer");
           _pointers.add(details.pointer);
           if(_pointers.length == 1) {
             if(Platform.isIOS) {
@@ -56,8 +57,8 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
         }
       },
       onPointerUp: (details){
-        print("pointerUp $_velocity, $_over, ${details.pointer}, $activePointer");
         if(details.pointer == activePointer) {
+          print("pointerUp $_velocity, $_over, ${details.pointer}, $activePointer");
           if(_over > 0) {
             if(Platform.isIOS){
               _isAnimating = true;
@@ -65,11 +66,14 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
                 print("fling $_velocity");
                 ChannelManager.fling(_velocity).then((value){
                   _isAnimating = false;
-                  if(_velocity<0 && activePointer==null){
-                    print("keyboard open");
+                  if(_velocity<0){
+                    if(activePointer==null) {
+                      print("keyboard open");
+                      showKeyboard(false);
+                    }
+                  } else {
                     dismissed = true;
-                    showKeyboard(false);
-                  } 
+                  }
                 });
               } else {
                 print("expand");
@@ -90,8 +94,8 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
         var position = details.position.dy;
         _over = position - (MediaQuery.of(context).size.height - _keyboardHeight);
         updateVelocity(position);
-        print("pointerMove $_over, $_isAnimating, $activePointer, ${details.pointer}");
         if(details.pointer == activePointer) {
+          print("pointerMove $_over, $_isAnimating, $activePointer, ${details.pointer}");
           if(_over > 0){
             if(Platform.isIOS) {
               if(_keyboardOpen)
