@@ -1,8 +1,8 @@
 name: flutter_interactive_keyboard
 description: A flutter plugin to dismiss the keyboard interactively.
 version: 0.0.1
-author: Mattia Crovero
-homepage:
+author: Mattia Crovero <mcrovero@gmail.com>
+homepage: https://github.com/mcrovero
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
