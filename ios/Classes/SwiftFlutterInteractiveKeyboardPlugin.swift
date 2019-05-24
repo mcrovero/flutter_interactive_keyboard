@@ -10,15 +10,11 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     var takingScreenshot = false
     var keyboardOpen = false
     var firstResponder = UIView()
+    var channel = FlutterMethodChannel()
     
-    override init(){
+    init(ch : FlutterMethodChannel){
         super.init()
-        mainWindow = UIApplication.shared.delegate?.window!
-        keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: 0)
-        keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: 0)
-        mainWindow.rootViewController?.view.addSubview(keyboardBackground)
-        mainWindow.rootViewController?.view.addSubview(keyboardView)
-        UIView.setAnimationsEnabled(true)
+        channel = ch
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: .UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: .UIKeyboardWillHide, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardDidShow), name: .UIKeyboardDidShow, object: nil)
@@ -27,12 +23,21 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_interactive_keyboard", binaryMessenger: registrar.messenger())
-        let instance = SwiftFlutterInteractiveKeyboardPlugin()
+        let instance = SwiftFlutterInteractiveKeyboardPlugin(ch: channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
+            case "init":
+                mainWindow = UIApplication.shared.delegate?.window!
+                keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: 0)
+                keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height, width: UIScreen.main.bounds.size.width, height: 0)
+                mainWindow.rootViewController?.view.addSubview(keyboardBackground)
+                mainWindow.rootViewController?.view.addSubview(keyboardView)
+                UIView.setAnimationsEnabled(true)
+                
+                break;
             case "showKeyboard":
                 UIView.setAnimationsEnabled(false)
                 let show = (call.arguments! as! Bool)
@@ -110,6 +115,7 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
         let v = w.resizableSnapshotView(from: keyboardRect, afterScreenUpdates: false, withCapInsets: .zero)!
         keyboardView.addSubview(v)
         keyboardView.frame = keyboardRect
+        channel.invokeMethod("screenshotTaken", arguments: nil)
     }
     
     func showKeyboard() {
@@ -123,7 +129,6 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     }
     
     @objc func handleKeyboard(_ notification: Notification) {
-        print("handleKeyboard")
         let isKeyboardShowing = notification.name == NSNotification.Name.UIKeyboardWillShow
         keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height -  (isKeyboardShowing ? keyboardRect.size.height : 0), width: keyboardRect.size.width, height: keyboardRect.size.height)
         keyboardBackground.backgroundColor = .white

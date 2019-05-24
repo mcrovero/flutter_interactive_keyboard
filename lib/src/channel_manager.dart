@@ -6,6 +6,9 @@ class ChannelManager {
 
   static const MethodChannel _channel = const MethodChannel('flutter_interactive_keyboard');
 
+  static Future<void> init() async {
+    await _channel.invokeMethod('init');
+  }
   // True opens keyboard, false hides it
   static Future<void> showKeyboard(bool show) async {
     await _channel.invokeMethod('showKeyboard',show);
@@ -25,5 +28,6 @@ class ChannelManager {
   static Future<void> startScroll(double keyboardHeight) async {
     await _channel.invokeMethod('startScroll',keyboardHeight);
   }
+  
 
 }

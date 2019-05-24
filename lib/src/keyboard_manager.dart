@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_interactive_keyboard/src/channel_receiver.dart';
 import 'channel_manager.dart';
 
 class KeyboardManagerWidget extends StatefulWidget {
@@ -13,6 +14,9 @@ class KeyboardManagerWidget extends StatefulWidget {
 }
 
 class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
+
+  ChannelReceiver _channelReceiver;
+  
   List<int> _pointers = [];
   int get activePointer => _pointers.length > 0 ? _pointers.first : null;
 
@@ -31,6 +35,18 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
   FocusNode substituteFocusNode;
   FocusNode get _focusNode => substituteFocusNode ?? widget.focusNode;
+
+  bool _hasScreenshot = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _channelReceiver = ChannelReceiver((){
+      _hasScreenshot = true;
+    });
+    _channelReceiver.init();
+    ChannelManager.init();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +111,7 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
           //print("pointerMove $_over, $_isAnimating, $activePointer, ${details.pointer}");
           if(_over > 0){
             if(Platform.isIOS) {
-              if(_keyboardOpen)
+              if(_keyboardOpen && _hasScreenshot)
                 hideKeyboard(false);
               ChannelManager.updateScroll(_over);
             } else {
