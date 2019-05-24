@@ -2,7 +2,7 @@
 A way to mimic the IOS interactive dismissable keyboard in Flutter. 
 If you're shipping to Android the behavior will sill be applied without animation due to the Android keyboard limitations.
 
->This plugin is still in development, if you'd like to contribute PRs are welcomed.
+*This plugin is still in development, if you'd like to contribute PRs are welcomed.*
 
 <img src="https://github.com/mcrovero/flutter_interactive_keyboard/raw/master/assets/demo1.gif" width="250">
 
@@ -23,4 +23,21 @@ KeyboardManagerWidget(
     },
   ),
 )
+```
+
+## Advanced
+### Change focusNode
+If your app has more than one TextField you can change the current FocusNode from the KeyboardManagerWidgetState as follows:
+```dart
+// Init variable
+GlobalKey<KeyboardManagerWidgetState> _key = GlobalKey();
+
+// In the build method
+KeyboardManagerWidget(
+  key: _key,
+  ...
+)
+
+// Wherever you like
+_key.currentState.substituteFocusNode = newFocusNode;
 ```
