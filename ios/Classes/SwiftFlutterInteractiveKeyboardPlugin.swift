@@ -21,6 +21,8 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
         UIView.setAnimationsEnabled(true)
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: .UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: .UIKeyboardWillHide, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardDidShow), name: .UIKeyboardDidShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardDidHide), name: .UIKeyboardDidHide, object: nil)
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -54,7 +56,10 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
                 result(true)
                 break;
             case "updateScroll":
-                let over = call.arguments! as! CGFloat
+                var over = call.arguments! as! CGFloat
+                if(over < 0) {
+                    over = 0;
+                }
                 keyboardView.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height-keyboardView.frame.height+over, width: keyboardView.frame.width, height: keyboardView.frame.height)
                 result(true)
                 break;
@@ -108,7 +113,6 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     }
     
     func showKeyboard() {
-        print(firstResponder)
         firstResponder.becomeFirstResponder()
     }
     func hideKeyboard() {
@@ -119,19 +123,27 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     }
     
     @objc func handleKeyboard(_ notification: Notification) {
+        print("handleKeyboard")
+        let isKeyboardShowing = notification.name == NSNotification.Name.UIKeyboardWillShow
+        keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height -  (isKeyboardShowing ? keyboardRect.size.height : 0), width: keyboardRect.size.width, height: keyboardRect.size.height)
+        keyboardBackground.backgroundColor = .white
+        keyboardView.isHidden = isKeyboardShowing
+
+        UIView.animate(withDuration: 0, animations: { () -> Void in
+            self.keyboardBackground.layoutIfNeeded()
+        })
+    }
+    
+    @objc func keyboardDidShow(_ notification: Notification) {
         if let userInfo = notification.userInfo {
             let keyboardFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
-            let isKeyboardShowing = notification.name == NSNotification.Name.UIKeyboardWillShow
-            keyboardOpen = isKeyboardShowing
-            keyboardView.isHidden = isKeyboardShowing
+            keyboardOpen = true
             keyboardRect = keyboardFrame!
-
-            keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height -  (isKeyboardShowing ? keyboardRect.size.height : 0), width: keyboardRect.size.width, height: keyboardRect.size.height)
-            keyboardBackground.backgroundColor = .white
-            UIView.animate(withDuration: 0, animations: { () -> Void in
-                self.keyboardBackground.layoutIfNeeded()
-            })
         }
+    }
+    @objc func keyboardDidHide(_ notification: Notification) {
+        keyboardOpen = false
+        keyboardView.isHidden = false
     }
 }
 extension UIView {

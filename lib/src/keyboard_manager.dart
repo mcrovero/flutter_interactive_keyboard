@@ -22,12 +22,12 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   double _lastPosition = 0.0;
 
   bool _keyboardOpen = false;
-  bool _isAnimating = false;
 
   double _keyboardHeight = 0.0;
   double _over = 0.0;
 
   bool dismissed = true; 
+  bool _dismissing = false;
 
   FocusNode substituteFocusNode;
   FocusNode get _focusNode => substituteFocusNode ?? widget.focusNode;
@@ -37,14 +37,14 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
     var bottom = MediaQuery.of(context).viewInsets.bottom;
     _keyboardOpen = bottom > 0;
     if(_keyboardOpen) {
-      print("keyboardOpen");
       dismissed = false; 
       _keyboardHeight = bottom;
     }
+  
     return Listener(
       onPointerDown: (details){
-        print("pointerDown $dismissed $_isAnimating $activePointer");
-        if(!dismissed) {
+        //print("pointerDown $dismissed $_isAnimating $activePointer $_keyboardOpen ${_pointers.length} $_dismissing");
+        if((!dismissed && !_dismissing) || _keyboardOpen) {
           _pointers.add(details.pointer);
           if(_pointers.length == 1) {
             if(Platform.isIOS) {
@@ -57,30 +57,27 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
         }
       },
       onPointerUp: (details){
-        if(details.pointer == activePointer) {
-          print("pointerUp $_velocity, $_over, ${details.pointer}, $activePointer");
+        if(details.pointer == activePointer && _pointers.length == 1) {
+          //print("pointerUp $_velocity, $_over, ${details.pointer}, $activePointer");
           if(_over > 0) {
             if(Platform.isIOS){
-              _isAnimating = true;
               if(_velocity > 0.1 || _velocity < -0.3){
-                print("fling $_velocity");
+                if(_velocity > 0){
+                  _dismissing = true;
+                }
                 ChannelManager.fling(_velocity).then((value){
-                  _isAnimating = false;
                   if(_velocity<0){
-                    if(activePointer==null) {
-                      print("keyboard open");
+                    if(activePointer==null && !dismissed) {
                       showKeyboard(false);
                     }
                   } else {
+                    _dismissing = false;
                     dismissed = true;
                   }
                 });
               } else {
-                print("expand");
                 ChannelManager.expand().then((value){
-                  _isAnimating = false;
                   if(activePointer==null){
-                    print("keyboard open");
                     showKeyboard(false);
                   }
                 });
@@ -91,11 +88,11 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
         _pointers.remove(details.pointer);
       },
       onPointerMove: (details){
-        var position = details.position.dy;
-        _over = position - (MediaQuery.of(context).size.height - _keyboardHeight);
-        updateVelocity(position);
         if(details.pointer == activePointer) {
-          print("pointerMove $_over, $_isAnimating, $activePointer, ${details.pointer}");
+          var position = details.position.dy;
+          _over = position - (MediaQuery.of(context).size.height - _keyboardHeight);
+          updateVelocity(position);
+          //print("pointerMove $_over, $_isAnimating, $activePointer, ${details.pointer}");
           if(_over > 0){
             if(Platform.isIOS) {
               if(_keyboardOpen)
@@ -113,6 +110,7 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
             }
           } else {
             if(Platform.isIOS) {
+              ChannelManager.updateScroll(0.0);
               if(!_keyboardOpen){
                 showKeyboard(false);
               }
@@ -121,11 +119,9 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
         }
       },
       onPointerExit: (details){
-        print("pointerExit");
         _pointers.remove(details.pointer);
       },
       onPointerCancel: (details){
-        print("pointerCancel");
         _pointers.remove(details.pointer);
       },
       child: widget.child,
@@ -143,10 +139,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
   showKeyboard(bool animate) {
     if(!animate && Platform.isIOS){
-      /*ChannelManager.animate(false).then((value){
-        _showKeyboard();
-        ChannelManager.animate(true);
-      });*/
       ChannelManager.showKeyboard(true);
     } else {
       _showKeyboard();
@@ -159,10 +151,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
   hideKeyboard(bool animate) {
     if(!animate && Platform.isIOS){
-      /*ChannelManager.animate(false).then((value){
-        _hideKeyboard();
-        ChannelManager.animate(true);
-      });*/
       ChannelManager.showKeyboard(false);
     } else {
       _hideKeyboard();
