@@ -27,6 +27,8 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   double _keyboardHeight = 0.0;
   double _over;
 
+  bool dismissed = true; 
+
   FocusNode substituteFocusNode;
   FocusNode get _focusNode => substituteFocusNode ?? widget.focusNode;
 
@@ -34,19 +36,23 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   Widget build(BuildContext context) {
     var bottom = MediaQuery.of(context).viewInsets.bottom;
     _keyboardOpen = bottom > 0;
-    if(_keyboardOpen) 
+    if(_keyboardOpen) {
+      dismissed = false; 
       _keyboardHeight = bottom;
+    }
     return Listener(
       onPointerDown: (details){
-        print("pointerDown $_isAnimating $activePointer");
-        _pointers.add(details.pointer);
-        if(_pointers.length == 1) {
-          if(Platform.isIOS) {
-            ChannelManager.startScroll(MediaQuery.of(context).viewInsets.bottom);
+        if(!dismissed) {
+          print("pointerDown $_isAnimating $activePointer");
+          _pointers.add(details.pointer);
+          if(_pointers.length == 1) {
+            if(Platform.isIOS) {
+              ChannelManager.startScroll(MediaQuery.of(context).viewInsets.bottom);
+            }
+            _lastPosition = details.position.dy;
+            _lastTime = DateTime.now().millisecondsSinceEpoch;
+            _velocities.clear();
           }
-          _lastPosition = details.position.dy;
-          _lastTime = DateTime.now().millisecondsSinceEpoch;
-          _velocities.clear();
         }
       },
       onPointerUp: (details){
@@ -61,6 +67,7 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
                   _isAnimating = false;
                   if(_velocity<0 && activePointer==null){
                     print("keyboard open");
+                    dismissed = true;
                     showKeyboard(false);
                   } 
                 });
