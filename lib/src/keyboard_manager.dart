@@ -7,12 +7,12 @@ import 'channel_manager.dart';
 class KeyboardManagerWidget extends StatefulWidget {
   final Widget child;
   final FocusNode focusNode;
-  KeyboardManagerWidget({Key key, this.child, this.focusNode}) : super(key: key);
+  KeyboardManagerWidget({Key key, @required this.child, @required this.focusNode}) : super(key: key);
 
-  _KeyboardManagerWidgetState createState() => _KeyboardManagerWidgetState();
+  KeyboardManagerWidgetState createState() => KeyboardManagerWidgetState();
 }
 
-class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
+class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   List<int> _pointers = [];
   int get activePointer => _pointers.length > 0 ? _pointers.first : null;
 
@@ -26,6 +26,9 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
   double _keyboardHeight = 0.0;
   double _over;
+
+  FocusNode substituteFocusNode;
+  FocusNode get _focusNode => substituteFocusNode ?? widget.focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +142,7 @@ class _KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
     }
   }
   _showKeyboard() {
-    FocusScope.of(context).requestFocus(widget.focusNode);
+    FocusScope.of(context).requestFocus(_focusNode);
     SystemChannels.textInput.invokeMethod('TextInput.show');
   }
 

@@ -1,7 +1,6 @@
 /// Flutter interactive keyboard Model
 ///
-/// To use, `import 'package:rubber/rubber.dart';`.
+/// To use, `import 'package:flutter_interactive_keyboard/flutter_interactive_keyboard.dart';`.
 library flutter_interactive_keyboard;
 
-export 'src/interactive_keyboard_focus_node.dart';
 export 'src/keyboard_manager.dart';

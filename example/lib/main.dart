@@ -10,7 +10,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  final FocusNode _focusNode = InteractiveKeyboardFocusNode();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
