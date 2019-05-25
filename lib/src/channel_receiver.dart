@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 
 class ChannelReceiver {
-
   final Function onScreenshotTaken;
 
   MethodChannel channel = const MethodChannel('flutter_interactive_keyboard');

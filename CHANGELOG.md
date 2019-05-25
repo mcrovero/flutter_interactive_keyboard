@@ -1,3 +1,7 @@
+## 0.0.1+1
+
+* Hot fix - Android error fixed
+
 ## 0.0.1
 
 * First release of the package. 
