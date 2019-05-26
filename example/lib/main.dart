@@ -30,6 +30,12 @@ class _MyAppState extends State<MyApp> {
               ),
               Expanded(
                 child: KeyboardManagerWidget(
+                  onKeyboardClose: (){
+                    print("keyboardClose");
+                  },
+                  onKeyboardOpen: () {
+                    print("keyboardOpen");
+                  },
                   focusNode: _focusNode,
                   child: ListView.builder(
                     itemCount: 100,

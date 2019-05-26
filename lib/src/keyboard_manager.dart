@@ -6,10 +6,18 @@ import 'package:flutter_interactive_keyboard/src/channel_receiver.dart';
 import 'channel_manager.dart';
 
 class KeyboardManagerWidget extends StatefulWidget {
+
+  /// The widget behind the view where the drag to close is enabled
   final Widget child;
+
+  /// Needed to manage the opening and closing of the keyboard
   final FocusNode focusNode;
+
+  final Function onKeyboardOpen;
+  final Function onKeyboardClose;
+  
   KeyboardManagerWidget(
-      {Key key, @required this.child, @required this.focusNode})
+      {Key key, @required this.child, @required this.focusNode, this.onKeyboardOpen, this.onKeyboardClose})
       : super(key: key);
 
   KeyboardManagerWidgetState createState() => KeyboardManagerWidgetState();
@@ -54,10 +62,21 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   @override
   Widget build(BuildContext context) {
     var bottom = MediaQuery.of(context).viewInsets.bottom;
-    _keyboardOpen = bottom > 0;
+    var keyboardOpen = bottom > 0;
+    var oldKeyboardOpen = _keyboardOpen ?? !keyboardOpen;
+    _keyboardOpen = keyboardOpen;
+    
     if (_keyboardOpen) {
       dismissed = false;
       _keyboardHeight = bottom;
+      if(!oldKeyboardOpen && widget.onKeyboardOpen != null && activePointer == null) {
+        widget.onKeyboardOpen();
+      }
+    } else {
+      // Close notification if the keyobard closes while not dragging
+      if(oldKeyboardOpen && widget.onKeyboardClose != null && activePointer == null) {
+        widget.onKeyboardClose();
+      }
     }
 
     return Listener(
@@ -93,6 +112,9 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
                   } else {
                     _dismissing = false;
                     dismissed = true;
+                    if(widget.onKeyboardClose != null) {
+                      widget.onKeyboardClose();
+                    }
                   }
                 });
               } else {

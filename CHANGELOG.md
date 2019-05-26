@@ -1,3 +1,7 @@
+## 0.1.0
+* First stable version
+* Added keyboard visibility listeners
+
 ## 0.0.1+1
 
 * Hot fix - Android error fixed
