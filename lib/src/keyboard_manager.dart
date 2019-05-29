@@ -70,12 +70,13 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
       dismissed = false;
       _keyboardHeight = bottom;
       if(!oldKeyboardOpen && widget.onKeyboardOpen != null && activePointer == null) {
-        widget.onKeyboardOpen();
+          widget.onKeyboardOpen();
       }
     } else {
       // Close notification if the keyobard closes while not dragging
       if(oldKeyboardOpen && widget.onKeyboardClose != null && activePointer == null) {
-        widget.onKeyboardClose();
+          widget.onKeyboardClose();
+        dismissed = true;
       }
     }
 
@@ -112,9 +113,8 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
                   } else {
                     _dismissing = false;
                     dismissed = true;
-                    if(widget.onKeyboardClose != null) {
+                    if(widget.onKeyboardClose != null)
                       widget.onKeyboardClose();
-                    }
                   }
                 });
               } else {
@@ -124,6 +124,12 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
                   }
                 });
               }
+            }
+          }
+
+          if (!Platform.isIOS) {
+            if (!_keyboardOpen){
+              dismissed = true;
             }
           }
         }
@@ -142,11 +148,17 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
               ChannelManager.updateScroll(_over);
             } else {
               if (_velocity > 0.1) {
-                if (_keyboardOpen) hideKeyboard(true);
-
-                dismissed = true;
+                if (_keyboardOpen) {
+                  hideKeyboard(true);
+                  if(widget.onKeyboardClose != null)
+                    widget.onKeyboardClose();
+                }
               } else if (_velocity < -0.5) {
-                if (!_keyboardOpen) showKeyboard(true);
+                if (!_keyboardOpen){
+                  showKeyboard(true);
+                  if(widget.onKeyboardOpen != null)
+                    widget.onKeyboardOpen();
+                }
               }
             }
           } else {
