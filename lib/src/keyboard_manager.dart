@@ -10,14 +10,11 @@ class KeyboardManagerWidget extends StatefulWidget {
   /// The widget behind the view where the drag to close is enabled
   final Widget child;
 
-  /// Needed to manage the opening and closing of the keyboard
-  final FocusNode focusNode;
-
   final Function onKeyboardOpen;
   final Function onKeyboardClose;
   
   KeyboardManagerWidget(
-      {Key key, @required this.child, @required this.focusNode, this.onKeyboardOpen, this.onKeyboardClose})
+      {Key key, @required this.child, this.onKeyboardOpen, this.onKeyboardClose})
       : super(key: key);
 
   KeyboardManagerWidgetState createState() => KeyboardManagerWidgetState();
@@ -41,9 +38,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
 
   bool dismissed = true;
   bool _dismissing = false;
-
-  FocusNode substituteFocusNode;
-  FocusNode get _focusNode => substituteFocusNode ?? widget.focusNode;
 
   bool _hasScreenshot = false;
 
@@ -199,7 +193,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   }
 
   _showKeyboard() {
-    FocusScope.of(context).requestFocus(_focusNode);
     SystemChannels.textInput.invokeMethod('TextInput.show');
   }
 

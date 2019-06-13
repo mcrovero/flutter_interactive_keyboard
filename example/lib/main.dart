@@ -10,8 +10,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  final FocusNode _focusNode = FocusNode();
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,7 +23,6 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: <Widget>[
               TextField(
-                focusNode: _focusNode,
                 keyboardAppearance: Brightness.dark,
               ),
               Expanded(
@@ -36,7 +33,6 @@ class _MyAppState extends State<MyApp> {
                   onKeyboardOpen: () {
                     print("keyboardOpen");
                   },
-                  focusNode: _focusNode,
                   child: ListView.builder(
                     itemCount: 100,
                     itemBuilder: (context,index){
