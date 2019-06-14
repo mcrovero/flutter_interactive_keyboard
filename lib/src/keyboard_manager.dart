@@ -12,9 +12,10 @@ class KeyboardManagerWidget extends StatefulWidget {
 
   final Function onKeyboardOpen;
   final Function onKeyboardClose;
+  final Function onKeyboardCompletelyClosed;
   
   KeyboardManagerWidget(
-      {Key key, @required this.child, this.onKeyboardOpen, this.onKeyboardClose})
+      {Key key, @required this.child, this.onKeyboardOpen, this.onKeyboardClose, this.onKeyboardCompletelyClosed})
       : super(key: key);
 
   KeyboardManagerWidgetState createState() => KeyboardManagerWidgetState();
@@ -63,13 +64,17 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
     if (_keyboardOpen) {
       dismissed = false;
       _keyboardHeight = bottom;
-      if(!oldKeyboardOpen && widget.onKeyboardOpen != null && activePointer == null) {
+      if(!oldKeyboardOpen && activePointer == null) {
+        if(widget.onKeyboardOpen != null)
           widget.onKeyboardOpen();
       }
     } else {
       // Close notification if the keyobard closes while not dragging
-      if(oldKeyboardOpen && widget.onKeyboardClose != null && activePointer == null) {
+      if(oldKeyboardOpen && activePointer == null) {
+        if(widget.onKeyboardClose != null)
           widget.onKeyboardClose();
+        if(widget.onKeyboardCompletelyClosed != null)
+          widget.onKeyboardCompletelyClosed();
         dismissed = true;
       }
     }
@@ -109,6 +114,8 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
                     dismissed = true;
                     if(widget.onKeyboardClose != null)
                       widget.onKeyboardClose();
+                    if(widget.onKeyboardCompletelyClosed != null)
+                      widget.onKeyboardCompletelyClosed();
                   }
                 });
               } else {
@@ -124,6 +131,8 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
           if (!Platform.isIOS) {
             if (!_keyboardOpen){
               dismissed = true;
+              if(widget.onKeyboardCompletelyClosed != null)
+                widget.onKeyboardCompletelyClosed();
             }
           }
         }
@@ -160,6 +169,12 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
               ChannelManager.updateScroll(0.0);
               if (!_keyboardOpen) {
                 showKeyboard(false);
+              }
+            } else {
+              if (!_keyboardOpen){
+                showKeyboard(true);
+                if(widget.onKeyboardOpen != null)
+                  widget.onKeyboardOpen();
               }
             }
           }
