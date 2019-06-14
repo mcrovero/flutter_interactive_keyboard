@@ -163,6 +163,12 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
               if (!_keyboardOpen) {
                 showKeyboard(false);
               }
+            } else {
+              if (!_keyboardOpen){
+                showKeyboard(true);
+                if(widget.onKeyboardOpen != null)
+                  widget.onKeyboardOpen();
+              }
             }
           }
         }
