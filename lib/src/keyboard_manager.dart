@@ -12,10 +12,9 @@ class KeyboardManagerWidget extends StatefulWidget {
 
   final Function onKeyboardOpen;
   final Function onKeyboardClose;
-  final Function onKeyboardCompletelyClosed;
   
   KeyboardManagerWidget(
-      {Key key, @required this.child, this.onKeyboardOpen, this.onKeyboardClose, this.onKeyboardCompletelyClosed})
+      {Key key, @required this.child, this.onKeyboardOpen, this.onKeyboardClose})
       : super(key: key);
 
   KeyboardManagerWidgetState createState() => KeyboardManagerWidgetState();
@@ -73,8 +72,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
       if(oldKeyboardOpen && activePointer == null) {
         if(widget.onKeyboardClose != null)
           widget.onKeyboardClose();
-        if(widget.onKeyboardCompletelyClosed != null)
-          widget.onKeyboardCompletelyClosed();
         dismissed = true;
       }
     }
@@ -114,8 +111,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
                     dismissed = true;
                     if(widget.onKeyboardClose != null)
                       widget.onKeyboardClose();
-                    if(widget.onKeyboardCompletelyClosed != null)
-                      widget.onKeyboardCompletelyClosed();
                   }
                 });
               } else {
@@ -131,8 +126,8 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
           if (!Platform.isIOS) {
             if (!_keyboardOpen){
               dismissed = true;
-              if(widget.onKeyboardCompletelyClosed != null)
-                widget.onKeyboardCompletelyClosed();
+              if(widget.onKeyboardClose != null)
+                widget.onKeyboardClose();
             }
           }
         }
@@ -153,8 +148,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
               if (_velocity > 0.1) {
                 if (_keyboardOpen) {
                   hideKeyboard(true);
-                  if(widget.onKeyboardClose != null)
-                    widget.onKeyboardClose();
                 }
               } else if (_velocity < -0.5) {
                 if (!_keyboardOpen){
@@ -169,12 +162,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
               ChannelManager.updateScroll(0.0);
               if (!_keyboardOpen) {
                 showKeyboard(false);
-              }
-            } else {
-              if (!_keyboardOpen){
-                showKeyboard(true);
-                if(widget.onKeyboardOpen != null)
-                  widget.onKeyboardOpen();
               }
             }
           }
