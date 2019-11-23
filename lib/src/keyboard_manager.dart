@@ -173,9 +173,6 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
           }
         }
       },
-      onPointerExit: (details) {
-        _pointers.remove(details.pointer);
-      },
       onPointerCancel: (details) {
         _pointers.remove(details.pointer);
       },
@@ -215,5 +212,14 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
   _hideKeyboard() {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     FocusScope.of(context).requestFocus(FocusNode());
+  }
+  
+  Future<void> removeImageKeyboard()async{
+    ChannelManager.updateScroll(_keyboardHeight);
+  }
+
+  Future<void> safeHideKeyboard()async {
+    await removeImageKeyboard();
+    _hideKeyboard();
   }
 }
