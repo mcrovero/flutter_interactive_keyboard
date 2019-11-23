@@ -1,3 +1,6 @@
+## 0.1.2
+* Added method to safely close the keyboard (prevents the fake keyboard to remain on screen)
+
 ## 0.1.1
 * First stable version
 * Added keyboard visibility listeners
