@@ -130,9 +130,21 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     
     @objc func handleKeyboard(_ notification: Notification) {
         let isKeyboardShowing = notification.name == NSNotification.Name.UIKeyboardWillShow
+        if(isKeyboardShowing) {
+            if let userInfo = notification.userInfo {
+                let keyboardFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
+                keyboardOpen = true
+                keyboardRect = keyboardFrame!
+            }
+        } else {
+            keyboardOpen = false
+        }
         keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height -  (isKeyboardShowing ? keyboardRect.size.height : 0), width: keyboardRect.size.width, height: keyboardRect.size.height)
         keyboardBackground.backgroundColor = .white
         keyboardView.isHidden = isKeyboardShowing
+        if(UIView.areAnimationsEnabled) {
+            keyboardView.isHidden = true
+        }
 
         UIView.animate(withDuration: 0, animations: { () -> Void in
             self.keyboardBackground.layoutIfNeeded()
@@ -140,15 +152,10 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     }
     
     @objc func keyboardDidShow(_ notification: Notification) {
-        if let userInfo = notification.userInfo {
-            let keyboardFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
-            keyboardOpen = true
-            keyboardRect = keyboardFrame!
-        }
+        //print("keyboardDidShow"
     }
     @objc func keyboardDidHide(_ notification: Notification) {
-        keyboardOpen = false
-        keyboardView.isHidden = false
+        //print("keyboardDidHide")
     }
 }
 extension UIView {
