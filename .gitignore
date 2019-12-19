@@ -4,5 +4,6 @@
 .packages
 .pub/
 
+.idea/
 build/
 **/**/ios/Flutter/flutter_export_environment.sh
