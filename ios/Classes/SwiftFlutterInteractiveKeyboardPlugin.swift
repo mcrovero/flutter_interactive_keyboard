@@ -15,10 +15,10 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     init(ch : FlutterMethodChannel){
         super.init()
         channel = ch
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: .UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: .UIKeyboardWillHide, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardDidShow), name: .UIKeyboardDidShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardDidHide), name: .UIKeyboardDidHide, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardDidShow), name: UIResponder.keyboardDidShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardDidHide), name: UIResponder.keyboardDidHideNotification, object: nil)
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -129,10 +129,10 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
     }
     
     @objc func handleKeyboard(_ notification: Notification) {
-        let isKeyboardShowing = notification.name == NSNotification.Name.UIKeyboardWillShow
+        let isKeyboardShowing = notification.name == UIResponder.keyboardWillShowNotification
         if(isKeyboardShowing) {
             if let userInfo = notification.userInfo {
-                let keyboardFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
+                let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as AnyObject).cgRectValue
                 keyboardOpen = true
                 keyboardRect = keyboardFrame!
             }
