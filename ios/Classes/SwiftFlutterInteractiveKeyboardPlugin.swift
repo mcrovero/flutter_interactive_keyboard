@@ -140,7 +140,11 @@ public class SwiftFlutterInteractiveKeyboardPlugin: NSObject, FlutterPlugin {
             keyboardOpen = false
         }
         keyboardBackground.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height -  (isKeyboardShowing ? keyboardRect.size.height : 0), width: keyboardRect.size.width, height: keyboardRect.size.height)
-        keyboardBackground.backgroundColor = .white
+        if #available(iOS 12.0, *) {
+            keyboardBackground.backgroundColor = firstResponder.traitCollection.userInterfaceStyle == .dark ? .black : .white
+        } else {
+            keyboardBackground.backgroundColor = .white
+        }
         keyboardView.isHidden = isKeyboardShowing
         if(UIView.areAnimationsEnabled) {
             keyboardView.isHidden = true
