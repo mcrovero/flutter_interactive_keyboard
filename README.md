@@ -1,10 +1,10 @@
 [![pub package](https://img.shields.io/pub/v/flutter_interactive_keyboard.svg)](https://pub.dev/packages/flutter_interactive_keyboard)
 
+**This plugin is not under active development. If you'd like to contribute, PRs are welcomed.**
+
 # Flutter Interactive Keyboard
 A way to mimic the IOS interactive dismissable keyboard in Flutter. 
 If you're shipping to Android the behavior will sill be applied without animation due to the Android keyboard limitations.
-
-*This plugin is still in development, if you'd like to contribute PRs are welcomed.*
 
 <img src="https://github.com/mcrovero/flutter_interactive_keyboard/raw/master/assets/demo1.gif" width="250">
 
