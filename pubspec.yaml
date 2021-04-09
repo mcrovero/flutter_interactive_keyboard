@@ -1,11 +1,11 @@
 name: flutter_interactive_keyboard
 description: A flutter plugin to dismiss the keyboard interactively similar to the IOS native behavior. On Android the functionality is mimed without drag.
-version: 0.1.3
+version: 0.2.0
 author: Mattia Crovero <mcrovero@gmail.com>
 homepage: https://github.com/mcrovero/flutter_interactive_keyboard
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
