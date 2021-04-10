@@ -67,12 +67,12 @@ class KeyboardManagerWidgetState extends State<KeyboardManagerWidget> {
       dismissed = false;
       _keyboardHeight = bottom;
       if (!oldKeyboardOpen && activePointer == null) {
-        if (widget.onKeyboardOpen != null) widget.onKeyboardOpen!();
+        widget.onKeyboardOpen?.call();
       }
     } else {
       // Close notification if the keyobard closes while not dragging
       if (oldKeyboardOpen && activePointer == null) {
-        if (widget.onKeyboardClose != null) widget.onKeyboardClose!();
+        widget.onKeyboardClose?.call();
         dismissed = true;
       }
     }
