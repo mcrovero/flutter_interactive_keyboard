@@ -17,5 +17,9 @@ dev_dependencies:
 
 flutter:
   plugin:
-    androidPackage: com.ujiboo.flutter_interactive_keyboard
-    pluginClass: FlutterInteractiveKeyboardPlugin
+    platforms:
+      android:
+        package: com.ujiboo.flutter_interactive_keyboard
+        pluginClass: FlutterInteractiveKeyboardPlugin
+      ios:
+        pluginClass: FlutterInteractiveKeyboardPlugin
