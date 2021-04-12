@@ -19,13 +19,11 @@ class ChannelManager {
     await _channel.invokeMethod('animate', animate);
   }
 
-  static Future<bool> expand() async {
-    return await _channel.invokeMethod('expand');
-  }
+  static Future<bool> expand() =>
+      _channel.invokeMethod<bool>('expand').then((x) => x ?? false);
 
-  static Future<bool> fling(double velocity) async {
-    return await _channel.invokeMethod('fling', velocity);
-  }
+  static Future<bool> fling(double velocity) =>
+      _channel.invokeMethod<bool>('fling', velocity).then((x) => x ?? false);
 
   static Future<void> updateScroll(double position) async {
     await _channel.invokeMethod('updateScroll', position);
